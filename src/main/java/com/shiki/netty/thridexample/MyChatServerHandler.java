@@ -13,17 +13,30 @@ import io.netty.util.concurrent.GlobalEventExecutor;
  */
 public class MyChatServerHandler extends SimpleChannelInboundHandler<String> {
 
+    /**
+     * 用于管理所有与服务器连接的channel对象
+     */
     private static ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
-        channelGroup.remove(ctx.channel());
-        channelGroup.writeAndFlush(ctx.channel().remoteAddress() + "发来的消息" + msg + "\n");
-        ctx.writeAndFlush("自己" + msg + "\n");
-        channelGroup.add(ctx.channel());
+///        channelGroup.remove(ctx.channel());
+        channelGroup.forEach(ch -> {
+            if (ch == ctx.channel()) {
+                ch.write("自己: " + msg + "\n");
+            } else {
+                ch.write(ctx.channel().remoteAddress() + "发来的消息" + msg + "\n");
+            }
+        });
+        channelGroup.flush();
+//        channelGroup.writeAndFlush(ctx.channel().remoteAddress() + "发来的消息" + msg + "\n");
+//        ctx.writeAndFlush("自己" + msg + "\n");
+//        channelGroup.add(ctx.channel());
     }
 
-    //    链接加入时
+    /**
+     * 链接加入时
+     */
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
         channelGroup.writeAndFlush("用户 - " + ctx.channel().remoteAddress() + "加入\n");
@@ -31,20 +44,28 @@ public class MyChatServerHandler extends SimpleChannelInboundHandler<String> {
         channelGroup.add(ctx.channel());
     }
 
+    /**
+     * 连接处于活动状态
+     */
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        channelGroup.writeAndFlush("用户 - " + ctx.channel().remoteAddress() + "上线\n");
+        System.out.println("用户 - " + ctx.channel().remoteAddress() + "上线");
     }
 
+    /**
+     * 不活跃
+     */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        channelGroup.writeAndFlush("用户 - " + ctx.channel().remoteAddress() + "下线\n");
+        System.out.println("用户 - " + ctx.channel().remoteAddress() + "下线");
     }
 
+    /**
+     * 当断开连接是netty会自动寻找并删除channelGroup中的连接属性
+     */
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         channelGroup.writeAndFlush("用户 - " + ctx.channel().remoteAddress() + "离开\n");
-//        System.out.println(ctx.channel().remoteAddress()+"下线");
     }
 
     @Override
