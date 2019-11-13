@@ -46,6 +46,15 @@ dependencies {
     )
 
 }
+//
+//buildscript {
+//    repositories {
+//        mavenCentral()
+//    }
+//    dependencies {
+//        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.10'
+//    }
+//}
 protobuf {
     protoc {
         artifact = 'com.google.protobuf:protoc:3.0.0'
@@ -59,6 +68,9 @@ protobuf {
         // all() returns the collection of all protoc tasks
         all().each { task ->
             // Here you can configure the task
+        }
+        all()*.plugins {
+            grpc{}
         }
 
         // In addition to all(), you may select tasks by various criteria:
