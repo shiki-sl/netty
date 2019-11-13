@@ -1,15 +1,29 @@
 plugins {
     id 'java'
+    id 'com.google.protobuf' version '0.8.8'
 }
 
 group 'com.shiki'
 version '1.0-SNAPSHOT'
 
 sourceCompatibility = 11
-
+sourceSets {
+    main {
+        proto {
+            srcDir 'src/main/protobuf'
+            srcDir 'src/main/protocolbuffers'
+            include '**/*.protodevel'
+        }
+    }
+    test {
+        proto {
+            srcDir 'src/test/protocolbuffers'
+        }
+    }
+}
 repositories {
     mavenLocal()
-    maven { url "http://maven.aliyun.com/nexus/content/groups/public/"}
+    maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
     mavenCentral()
     jcenter()
     maven { url "https://repo.spring.io/snapshot" }
@@ -20,10 +34,49 @@ repositories {
 
 dependencies {
     compile(
+            'javax:javaee-api:8.0.1',
             'io.netty:netty-all:4.1.39.Final',
             'com.google.protobuf:protobuf-java:3.10.0',
             'com.google.protobuf:protobuf-java-util:3.10.0',
-            'com.alibaba:fastjson:1.2.59'
+//            'com.alibaba:fastjson:1.2.59',
+            'org.apache.thrift:libthrift:0.12.0',
+            'io.grpc:grpc-netty-shaded:1.25.0',
+            'io.grpc:grpc-protobuf:1.25.0',
+            'io.grpc:grpc-stub:1.25.0'
     )
 
+}
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.0.0'
+    }
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.0.0-pre2'
+        }
+    }
+    generateProtoTasks {
+        // all() returns the collection of all protoc tasks
+        all().each { task ->
+            // Here you can configure the task
+        }
+
+        // In addition to all(), you may select tasks by various criteria:
+
+        // (Java-only) returns tasks for a sourceSet
+        ofSourceSet('main')
+
+        // (Android-only selectors)
+        // Returns tasks for a flavor
+
+//        ofFlavor('demo')
+//        // Returns tasks for a buildType
+//        ofBuildType('release')
+//        // Returns tasks for a variant
+//        ofVariant('demoRelease')
+//        // Returns non-androidTest tasks
+//        ofNonTest()
+        // Return androidTest tasks
+//        ofTest()
+    }
 }

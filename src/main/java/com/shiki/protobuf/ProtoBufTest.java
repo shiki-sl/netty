@@ -1,6 +1,5 @@
 package com.shiki.protobuf;
 
-import com.alibaba.fastjson.JSON;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
